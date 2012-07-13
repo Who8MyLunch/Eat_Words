@@ -1,0 +1,46 @@
+head	1.1;
+access;
+symbols;
+locks
+	gary:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	94.11.26.06.44.30;	author gary;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@import whrandom
+from dat import *
+
+class Bag:
+	def __init__(self):
+		self.reset()
+
+	def reset(self):
+		self.list=reduce(lambda x,y: x+[y],
+				'aaaaaaaaabbccddddeeeeeeeeeeeeffggghhiiiiiiiiijkllllmmnnnnnnooooooooppqrrrrrrssssttttttuuuuvvwwxyyz__', [])
+
+	def grab(self, n):
+		retval=[]
+		for i in range(min(n,len(self.list))):
+			c = whrandom.choice(self.list)
+			self.list.remove(c)
+			retval.append(c)
+		return retval
+
+	def swap(self,rack):
+		self.list = self.list + rack
+		return self.grab(RACKSIZE)
+@

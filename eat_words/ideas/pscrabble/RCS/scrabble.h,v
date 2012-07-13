@@ -1,0 +1,33 @@
+head	1.1;
+access;
+symbols;
+locks
+	gary:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	94.11.26.06.44.30;	author gary;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* Copyright 1994 Gary Capell.
+ * You may modify and use this code, but you're not allowed
+ * to make money out of it.
+ * Leave this message here.
+ */
+#include <assert.h>
+#include "types.h"
+#include "fns.h"
+#include "dat.h"
+@

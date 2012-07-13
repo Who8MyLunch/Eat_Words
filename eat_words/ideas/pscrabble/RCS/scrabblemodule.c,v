@@ -1,0 +1,169 @@
+head	1.1;
+access;
+symbols;
+locks
+	gary:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	94.11.26.06.44.30;	author gary;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include "scrabble.h"
+
+#include <allobjects.h>
+#include <modsupport.h>
+
+
+static object *
+scrabble_findmove(object *self, object *args)
+{
+	/* Given a string representing a rack,
+	 * return the recommended play.
+	 */
+
+	char	*s;
+	Play	play;
+	Rack	rack;
+	Word	word;
+	char	buf[BLEN+3];
+
+	if (!getargs(args, "s", &s))
+		return NULL;
+
+	DPRINT("got args\n");
+	str2rack(s,&rack);
+	rackprint(&rack);
+	DPRINT("rack printed\n");
+
+	if(findplay(&play, &rack)) {
+		word2str(&play.word, buf);
+		DPRINT("m %d %d %c %s\n",
+			play.pos.x, play.pos.y, ori2c(play.o), buf);
+	} else {
+		DPRINT("no word can be found\n");
+		err_setstr(ValueError, "no move possible");
+		return NULL;
+	}
+
+	DPRINT("done move\n");
+
+	word2str(&play.word, buf);
+	return (mkvalue("(llcs)",
+		play.pos.x, play.pos.y, ori2c(play.o), buf));	
+}
+
+static object *
+scrabble_makemove(object *self, object *args)
+{
+	/* Given a play, make the play (change our board)
+	 */
+	char	*s;
+	long	x,y;
+	Play	p;
+	Ori	o;
+	char	*err;
+	char	c;
+
+	if (!getargs(args, "(llcs)", &x, &y, &c, &s))
+		return NULL;
+	o = c2ori(c);
+	initplay(&p, x, y, o, s);
+	if(err = valid(&p)) {
+		err_setstr(ValueError, err );
+		return NULL;
+	}
+	play(&p);
+
+	INCREF(None);
+	return None;
+}
+
+static object *
+scrabble_scoremove(object *self, object *args)
+{
+	/* Given a play, return the score.  Raise an exception
+	 * if the move isn't valid.
+	 */
+	char	*s;
+	long	x,y;
+	long	res;
+	char	*foom;
+	Play	p;
+	Rack	rack;
+	Ori	o;
+	char	c;
+
+	if (!getargs(args, "(llcs)", &x, &y, &c, &s))
+		return NULL;
+	o = c2ori(c);
+
+	initplay(&p, x, y, o, s);
+	if(foom = valid(&p)) {
+		DPRINT("play not valid %s\n", foom);
+		err_setstr(ValueError, foom);
+		return NULL;
+	}
+	return newintobject(score(&p.word, p.pos, p.o));
+}
+static object *
+scrabble_printboard(object *self, object *args)
+{
+	boardprint();
+	INCREF(None);
+	return None;
+}
+static object *
+scrabble_reset(object *self, object *args)
+{
+	initboard();
+	INCREF(None);
+	return None;
+}
+
+
+static struct methodlist scrabble_methods[] = {
+	{"findmove",		scrabble_findmove},
+	{"makemove",		scrabble_makemove},
+	{"scoremove",		scrabble_scoremove},
+	{"board",		scrabble_printboard},
+	{"reset",		scrabble_reset},
+	{NULL,		NULL}		/* sentinel */
+};
+
+/* Initialization function for the module (*must* be called initscrabble) */
+
+void
+initscrabble()
+{
+	object *m, *d, *x;
+	char	*dictname = "min.42k";
+
+	initdict(dictname);
+	initboard();
+
+	/* Create the module and add the functions */
+	m = initmodule("scrabble", scrabble_methods);
+	/* Check for errors */
+	if (err_occurred())
+		fatal("can't initialize module scrabble");
+}
+@

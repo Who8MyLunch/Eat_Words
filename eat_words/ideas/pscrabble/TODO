@@ -1,0 +1,17 @@
+BUGS
+rack letters can be moved to be invisible
+
+FEATURES
+communicate with backend by pipe rather than shared libraries
+lose dependency on 32 bit integers
+read dictionary on the fly
+
+configurable size (bitmaps, squaresize -- some poor folk have 15"
+screen)
+levels of difficulty
+nice letters
+different letters for blanks
+save/restore game
+
+add/delete words from dictionary
+arbitrary list of words as dictionary

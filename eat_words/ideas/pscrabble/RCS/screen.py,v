@@ -1,0 +1,201 @@
+head	1.3;
+access;
+symbols;
+locks
+	gary:1.3; strict;
+comment	@# @;
+
+
+1.3
+date	94.11.26.08.23.42;	author gary;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	94.11.26.07.30.18;	author gary;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	94.11.26.06.44.30;	author gary;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@#!/usr/pgrad/gary/bin/sun4d/pythontk
+from Tkinter import *
+from dat import *
+import play, string, sys
+
+def createmenus(menubar,menus):
+	for name, items in menus:
+		b = Menubutton(menubar, {'text': name,
+			Pack: {'side': 'left','padx': '2m'}})
+		b.menu = Menu(b)
+		for item,cmd in items:
+			b.menu.add('command',
+				{'label': item, 'command' : cmd})
+		b['menu'] = b.menu
+
+class Screen(Frame):
+    def gameoverdialog(self,message):
+	dialog = Toplevel()
+	choice = self.tk.call("tk_dialog", dialog, "Game over man",
+			message,"questhead", "0",
+			"Try again", "lie down and die")
+	if  choice == '0':
+		return
+	sys.exit()
+
+    def message(self,text):
+	dialog = Toplevel()
+	self.tk.call("tk_dialog", dialog, "message", text, "", "0", "OK")
+
+    def enterword(self, event):
+	self.draw.delete(self.rubberbandLine)
+	word = event.widget.get()
+	event.widget.delete(0,len(word))
+	sx,sy = self.startx/squaresize, self.starty/squaresize
+	ex,ey = self.endx/squaresize, self.endy/squaresize
+	self.trymove(string.lower(word), sx,sy,ex,ey)
+
+    def refresh_score(self,hscore, cscore):
+	self.SCORE['text'] = 'SCORE '+hscore + ',' + cscore
+
+    def mouseDown(self, event):
+	self.startx = self.draw.canvasx(event.x, self.grid)
+	self.starty = self.draw.canvasy(event.y, self.grid)
+
+    def mouseMotion(self, event):
+	self.endx = self.draw.canvasx(event.x, self.grid)
+	self.endy = self.draw.canvasy(event.y, self.grid)
+	dx = self.endx - self.startx
+	dy = self.endy - self.starty
+	if abs(dx) > abs(dy):
+		self.endy = self.starty
+	else:
+		self.endx = self.startx
+
+	if (self.startx != event.x)  and (self.starty != event.y) : 
+	    self.draw.delete(self.rubberbandLine)
+	    self.rubberbandLine = self.draw.create_line(
+			self.startx, self.starty,
+			self.endx, self.endy,
+			{'width':3})
+	    self.update_idletasks()
+
+    def showmove(self, newletters):
+	for x,y,c in newletters:
+		self.draw.create_bitmap(x*squaresize, y*squaresize,
+			{"bitmap":'@@bitmap/'+c, 'foreground':'black',
+			'background': 'ivory'} )
+	self.showgrid()
+
+    def showgrid(self):
+	for x in range(boardsquares+1):
+		d = squaresize/2
+		self.draw.create_line(d,x*squaresize+d,boardsize-d,x*squaresize+d)
+		self.draw.create_line(x*squaresize+d,d, x*squaresize+d,boardsize-d)
+	
+    def reset(self):
+	for x in range(boardsquares):
+		for y in range(boardsquares):
+			self.draw.create_bitmap((x+1)*squaresize, (y+1) *squaresize, 
+				self.specialdict[special[x][y]])
+	self.showgrid()
+
+    def refresh_rack(self, rackstr):
+	for b in self.rackbitmaps:
+		self.RACK.delete(b)
+	x,y = squaresize, squaresize
+	for c in rackstr:
+		self.rackbitmaps.append(self.RACK.create_bitmap(x, y,
+		{"bitmap":'@@bitmap/'+c}))
+		x = x + squaresize
+
+    def rackmouseDown(self, event):
+	self.racklastx = event.x
+	self.racklasty = event.y
+		
+    def rackmouseMove(self, event):
+	if event.widget.find_withtag("current"):
+		self.RACK.move("current", event.x - self.racklastx, event.y - self.racklasty)
+		self.racklastx = event.x
+		self.racklasty = event.y
+
+    def createWidgets(self,menus,trymove):
+	self.trymove = trymove
+	top = {'side': 'top', 'fill': 'x'}
+	bottom = {'side': 'bottom'}
+	self.MBAR = Frame(self, {'relief': 'raised',  'bd': 2,Pack:top})
+
+	createmenus(self.MBAR,menus)
+	self.SCORE = Label(self, {'text': 'SCRABBLE: score 0 0', Pack:top})
+
+	self.RACK =Canvas(self, {"width" : `squaresize*10`, "height" : `squaresize*2`,'bd':2,Pack:top})
+	self.rackbitmaps=[]
+	Widget.bind(self.RACK, "<1>", self.rackmouseDown)
+	Widget.bind(self.RACK, "<B1-Motion>", self.rackmouseMove)
+
+	self.ENTER = Entry (self, {'bd': 2, 'relief':'raised', Pack:top})
+	self.draw = Canvas(self, {"width" : `boardsize`, "height" : `boardsize`,Pack:bottom})
+
+	self.ENTER.bind('<Return>', self.enterword)
+	self.grid = squaresize
+
+	if self.winfo_depth() == 1:
+		self.specialdict = bwspecial
+	else:
+		self.specialdict = colorspecial
+
+	self.ENTER.focus()
+
+	self.reset()
+
+    def __init__(self, menus, trymove, master=None):
+	Frame.__init__(self, master)
+	Pack.config(self)
+	self.createWidgets(menus, trymove)
+	self.rubberbandLine = None
+	self.startx = self.starty = self.endx = self.endy = 0
+	Widget.bind(self.draw, "<Button-1>", self.mouseDown)
+	Widget.bind(self.draw, "<Button1-Motion>", self.mouseMotion)
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d68 1
+d70 6
+d81 2
+a82 1
+	
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@a40 3
+    def refresh_rack(self, rackstr):
+	self.RACK['text'] = rackstr
+
+d75 19
+d102 6
+a107 1
+	self.RACK = Label(self, {'text': 'Rack: ', Pack:top})
+@

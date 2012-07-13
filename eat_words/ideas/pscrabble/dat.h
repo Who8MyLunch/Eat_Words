@@ -1,0 +1,15 @@
+extern Edge 	*dict;
+extern int	root,total;
+extern Square	board[BLEN][BLEN];
+extern char	*argv0;
+extern char	*dictname;
+extern int	points[];
+extern Bool	firstmove;
+extern Pos	dletters[];
+extern Pos	tletters[];
+extern Pos	dwords[];
+extern Pos	twords[];
+extern char	specialchars[];
+extern int	points[];
+extern int	distrib[];
+extern int	goodenough;

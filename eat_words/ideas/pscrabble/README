@@ -1,0 +1,17 @@
+To run: ./play.py
+
+Portability: you're on your own, sorry :-/
+
+Installation: (assuming you're lucky) 
+	make
+	edit *.py to reflect where python is kept on your system
+	./play.py
+
+	you must be in this directory, to read the dictionary (min.42k)
+	and the bitmaps (./bitmap/*)
+
+License:  do whatever you want to/with this stuff, just don't make
+any money out of it, and I'd appreciate it if you send me any diffs.
+
+Gameplay: drag a line to indicate roughly where you want to place a
+word, type the word and hit return.

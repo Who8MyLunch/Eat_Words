@@ -1,0 +1,38 @@
+head	1.1;
+access;
+symbols;
+locks
+	gary:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	94.11.26.06.44.30;	author gary;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@extern Edge 	*dict;
+extern int	root,total;
+extern Square	board[BLEN][BLEN];
+extern char	*argv0;
+extern char	*dictname;
+extern int	points[];
+extern Bool	firstmove;
+extern Pos	dletters[];
+extern Pos	tletters[];
+extern Pos	dwords[];
+extern Pos	twords[];
+extern char	specialchars[];
+extern int	points[];
+extern int	distrib[];
+@
