@@ -1,13 +1,10 @@
 
-from distribute_setup import use_setuptools
-use_setuptools()
-
 from setuptools import setup, find_packages
 
 version = '2012.05.24'
 
 # Do it.
-setup(name='words',
+setup(name='eat_words',
       packages=find_packages(),
       package_data={'': ['*.yml', '*.png', '*.txt']},
 
@@ -15,8 +12,5 @@ setup(name='words',
       version=version,
       author='Pierre V. Villeneuve',
       author_email='pierre.villeneuve@gmail.com',
-      description='Words words words',
-)
-
-
-
+      description='Play a nice game of scabble',
+      )
