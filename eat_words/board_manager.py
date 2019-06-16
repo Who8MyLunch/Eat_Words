@@ -5,54 +5,52 @@ import numpy as np
 
 
 
-class Board(object):
-    """
-    A scrabble board.
+class Board():
+    """A scrabble board
     """
 
     def __init__(self):
-        """
-        Instantiate a new board class.
+        """Instantiate a new board class.
         Set multipliers.
         No letters on the board.
         """
 
-        # Component boards.
+        # Component boards
         self.width = 15 + 2   # includes moat
         shape = (self.width, self.width)
 
         self.letters = np.zeros(shape, dtype='|S1')
+
+        # Point multipliers
         self.xL = np.ones(shape, dtype=np.uint8)
         self.xW = np.ones(shape, dtype=np.uint8)
 
         self.blank = '.'
-        
+
         self.playables = np.zeros(shape, dtype='|S7')
-        
+
         self.reset()
-        
+
         # Done.
-    
+
 
     def reset(self):
+        """Reset board to clean slate.
         """
-        Reset board to clean slate.
-        """
-        
+
         self.letters[:] = self.blank
         self._anchors = None
         self._clear_tiles = None
 
         self._player_moves = []
-        
+
         self.initialize_multipliers()
-        
+
         # Done.
-        
-        
+
+
     def __repr__(self):
-        """
-        Nice class visualization.
+        """Nice class visualization.
         """
 
         s = '\n' + \
@@ -78,8 +76,7 @@ class Board(object):
 
 
     def initialize_multipliers(self):
-        """
-        Set default values for letter and word multipliers.
+        """Set default values for letter and word multipliers.
         """
 
         # First quadrant.
@@ -131,7 +128,7 @@ class Board(object):
             self.xW[self.width-i-1, self.width-j-1] = 3   # Q3
             self.xW[i, self.width-j-1] = 3                # Q4
 
-            
+
         # Moat around the edges.
         self.xL[ 0, :] = 0
         self.xL[-1, :] = 0
@@ -150,29 +147,28 @@ class Board(object):
     # Line stuff.
     def get_line(self, j):
 
-        # Get the board letters.
+        # Get the board letters
         line = self.letters[:, j]
-        
-        # Identify anchor points.
+
+        # Identify anchor points
         for i in range(self.width):
             if self._cell_is_anchor( (i, j) ):
                 line[i] = '+'
-                
-        # Playable letters.
+
+        # Playable letters
         playable = np.zeros(self.width, dtype='|S7')
-        
-        # Update.
+
+        # Update
         for i in range(self.width):
             if line[i] == '+':
                 playable[i] = self.playables[i, j]
-        
+
         # Done.
         return line, playable
-    
+
     #########################################
     def set_game_letters(self, ij_letters):
-        """
-        PLace initial game letters on the board.  Clobber any multipliers underneath.
+        """Place initial game letters on the board.  Clobber any multipliers underneath.
         """
         for ij, letter in ij_letters:
             i, j = ij
@@ -182,39 +178,32 @@ class Board(object):
 
 
         self._anchors = None
-        # Done.
 
-        
     def play_letters(self, ij_letters):
-        """
-        Place new letters on the board.
+        """Place new letters on the board.
         This represents a possible move by the player.
         This operation may be undone.
         """
-        
+
         self._anchors = None
-        
+
         # Undo prior candidate moves, if any.
-        self.undo_play_letters()
+        self.unplay_letters()
         self._player_moves = []
-        
+
         # Play the letters.
         for ij, L in ij_letters:
             i, j = ij
-            
+
             # Only allowed to apply a move to a blank tile.
             assert(self.letters[i, j] == self.blank)
             self.letters[i, j] = L
-            
+
             # Store move for later undo.
             self._player_moves.append( (ij, L) )
-        
-        # Done.
-        
-        
+
     def unplay_letters(self):
-        """
-        Undo just-played letters.
+        """Undo just-played letters.
         """
         count = 0
         for ij, L in self._player_moves:
@@ -225,18 +214,17 @@ class Board(object):
 
             # Remove it.
             self.letters[i, j] = self.blank
-            
+
         # Done.
         self._player_moves = []
-        
+
         return count
-        
+
     ##############################################
-    
+
     @property
     def clear_tiles(self):
-        """
-        List of non-anchor empty tiles.
+        """List of non-anchor empty tiles.
         """
         if self._clear_tiles is None:
             self._clear_tiles = []
@@ -247,12 +235,10 @@ class Board(object):
                         self._clear_tiles.append(ij)
 
         return self._clear_tiles
-        
-    
+
     @property
     def anchors(self):
-        """
-        List of anchor points' coordinates.
+        """List of anchor points' coordinates.
         """
         if self._anchors is None:
             self._clear_tiles = None
@@ -308,14 +294,14 @@ class Board(object):
         return have_neighbor
 
 
-        
+
     def _cell_is_letter(self, (i, j) ):
         """
         Return True if cell coordinates map to a valid letter.
         """
         L = self.letters[i, j]
         return self._value_is_letter(L)
-        
+
 
     def _value_is_letter(self, L):
         """
@@ -324,12 +310,11 @@ class Board(object):
         return not (L == self.blank)
 
 
-        
+
     ############################
 
     def contiguous_vertical(self, (i, j) ):
-        """
-        Find contiguous set of letters connected to cell (i, j) in vertical direction.
+        """Find contiguous set of letters connected to cell (i, j) in vertical direction.
         Return starting ij and letters.
         """
         line = self.letters[i, :]
@@ -343,8 +328,7 @@ class Board(object):
 
 
     def contiguous_horizontal(self, (i, j) ):
-        """
-        Find contiguous set of letters connected to cell ij in horizontal direction.
+        """Find contiguous set of letters connected to cell ij in horizontal direction.
         Return starting ij and letters.
         """
         line = self.letters[:, j]
@@ -353,7 +337,7 @@ class Board(object):
         kj = k, j
 
         letters = self.letters[k:k+num, j].tostring()
-        
+
         return kj, letters
 
 
@@ -426,7 +410,7 @@ if __name__ == '__main__':
     more_letters = [((12,  7), 'o'),
                     ((12,  9), 'd'),
                     ((12, 10), 's')]
-                    
+
     b.play_letters(more_letters)
     print(b)
 
