@@ -1,16 +1,14 @@
 
 from setuptools import setup, find_packages
 
-version = '2012.05.24'
 
-# Do it.
-setup(name='eat_words',
-      packages=find_packages(),
-      package_data={'': ['*.yml', '*.png', '*.txt']},
+version = '2019.6.18'
 
-      # Metadata
-      version=version,
-      author='Pierre V. Villeneuve',
-      author_email='pierre.villeneuve@gmail.com',
-      description='Play a nice game of scabble',
-      )
+dependencies = ['numpy', 'ordered_namespace']
+
+
+setuptools.setup(install_requires=dependencies,
+                 package_data={'': ['*.yml', '*.png', '*.txt']},
+                 include_package_data=True,
+                 packages=setuptools.find_packages(),
+                 version=version)
